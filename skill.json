@@ -1,8 +1,8 @@
 {
   "name": "jingli-home-ai-design-skill",
-  "display_name": "晶鲤焕新家AI设计",
-  "version": "0.2.0",
-  "description": "家装设计 Skill / 远程 MCP Connector，提供真实户型图解析、Gemini nano banana 效果图生成、TOS上传、方案与报价草案工具集。",
+  "display_name": "晶鲤家装设计AI",
+  "version": "0.3.0",
+  "description": "晶鲤家装设计AI Skill。可被通用Agent安装，通过意图识别将用户需求编排为MCP工具调用，完成户型解析、方案生成、效果图生成与TOS上传。",
   "keywords": [
     "家装",
     "装修设计",
@@ -15,12 +15,52 @@
     "火山云",
     "晶鲤"
   ],
+  "installation": {
+    "type": "remote_mcp_skill",
+    "entry": "mcp_server.url",
+    "notes": "Install in generic agents as a remote MCP skill; agent should route intent to tools."
+  },
+  "intent_routing": {
+    "required_collection_fields": [
+      "user_requirements",
+      "budget_range",
+      "family_profile",
+      "preferred_style",
+      "forbidden_items"
+    ],
+    "routes": [
+      {
+        "intent": "需求梳理/任务书",
+        "tools": ["build_design_brief"]
+      },
+      {
+        "intent": "户型解析",
+        "tools": ["upload_floorplan_to_tos", "parse_floorplan"]
+      },
+      {
+        "intent": "方案草案",
+        "tools": ["match_products", "compose_design_scheme"]
+      },
+      {
+        "intent": "效果图",
+        "tools": ["generate_render_prompt", "generate_design_render", "upload_render_to_tos"]
+      },
+      {
+        "intent": "报价",
+        "tools": ["generate_quote"]
+      },
+      {
+        "intent": "一键全流程",
+        "tools": ["generate_full_design_package"]
+      }
+    ]
+  },
   "mcp_server": {
     "transport": "http",
-    "url": "https://misc.wjkj.com/mcp",
+    "url": "https://misc.wjkj.com/mcp/",
     "url_env": "MCP_BASE_URL",
     "base_url_env": "MCP_BASE_URL",
-    "default_base_url": "https://misc.wjkj.com/mcp",
+    "default_base_url": "https://misc.wjkj.com/mcp/",
     "tools_endpoint": "/tools",
     "notes": "Compatibility fields included for different agent platforms: prefer `url`, fallback to `default_base_url + tools_endpoint`."
   },
@@ -104,7 +144,7 @@
     },
     {
       "name": "generate_full_design_package",
-      "description": "专用Agent一键串联全链路（保留所有原子工具）",
+      "description": "给专用或通用Agent的一键全链路工具：从需求到方案、效果图、上传与报价",
       "read_only": false,
       "input_schema": {"type": "object"}
     }

@@ -1,97 +1,97 @@
 ---
 name: jingli-home-ai-design-skill
-description: 晶鲤焕新家AI设计。面向家装设计与报价场景，支持真实户型图解析、设计任务书、风格方案、商品匹配、Gemini nano banana效果图生成、效果图与户型图上传火山引擎TOS、报价草案与项目回写。
-version: 0.2.0
+displayName: 晶鲤家装设计AI
+description: 通用Agent可安装的家装设计Skill。Agent先识别用户意图并提取参数，再调用远程MCP服务完成真实户型解析、设计方案、效果图生成与TOS上传。
+version: 0.3.0
 alwaysApply: false
 keywords:
-  - 晶鲤
-  - 焕新家
+  - 晶鲤家装设计AI
   - 家装
-  - 装修设计
-  - 户型图
+  - 装修
+  - 户型解析
   - 效果图
   - 报价
+  - MCP
   - Gemini
-  - nano banana
   - TOS
-  - 火山云
-  - 掌赋
 ---
 
-> **⚠️ AI Agent 必读**
->
-> 1. 本 Skill 的户型解析与效果图生成必须走 MCP 工具的真实链路，不得伪造结果。
-> 2. 户型图、效果图都应上传到 TOS 后再作为可追踪资产返回。
-> 3. 用户需求参数必须先通过对话澄清后再调用工具，不得自行脑补预算、面积、商品与价格。
-> 4. MCP 调用失败时必须明确告知，并提示补充信息或稍后重试。
+## 目标
+让通用 Agent 在用户沟通中自动完成：
+1. 识别用户家装意图
+2. 提取并补齐参数
+3. 按规则调用远程 MCP 工具
+4. 返回结构化设计结果与可访问资产链接
 
-## 晶鲤焕新家AI设计 · Skill
+远程 MCP 地址：`https://misc.wjkj.com/mcp/`
 
-### 安装后引导
-当用户刚安装本 Skill 时，Agent 应主动：
-1. 告知可直接描述家庭情况、预算、风格偏好、禁忌项，并上传户型图。
-2. 给出推荐提问示例：
-   - “我家三口人，预算20万，想做奶油原木风，先帮我出设计任务书”
-   - “我上传了户型图，先帮我解析空间结构，再出客厅效果图”
-   - “请给我一个草案报价，标注需要复核的风险项”
-3. 说明流程会调用真实模型与真实存储：
-   - 户型图真实解析（Gemini）
-   - 装修效果图真实生成（Gemini nano banana）
-   - 图像资产真实上传（Volcengine TOS）
+## Agent 工作流（必须遵循）
+1. 先做意图识别：判断用户处于“需求梳理 / 户型解析 / 方案设计 / 效果图 / 报价 / 全流程”。
+2. 做参数收集：缺参数先追问，不可臆造。
+3. 工具编排调用：严格按下方映射顺序执行。
+4. 结果回传：返回结构化结论 + 风险说明 + 资产URL。
 
-### 标准调用顺序（必须）
-1. **需求澄清**：先与用户沟通确认 `user_requirements/budget_range/family_profile/preferred_style/forbidden_items`。
-2. **户型图处理**：用户给图后，先 `upload_floorplan_to_tos`，再 `parse_floorplan`。
-3. **方案生成**：`build_design_brief` → `match_products` → `compose_design_scheme`。
-4. **效果图生成**：`generate_render_prompt` → `generate_design_render` → `upload_render_to_tos`。
-5. **报价输出**：`generate_quote`。
-6. **写回动作**：`save_scheme_to_project` 前必须二次确认。
+## 意图到工具映射
+1. 需求梳理
+- 工具：`build_design_brief`
+- 必要参数：`user_requirements`
+- 推荐补齐：`budget_range`, `family_profile`, `preferred_style`, `forbidden_items`
 
-### 触发场景映射
-| 用户可能会问 | 应调用工具 |
-|---|---|
-| “先帮我整理设计需求” | `build_design_brief` |
-| “我上传了户型图，帮我解析” | `upload_floorplan_to_tos` → `parse_floorplan` |
-| “按奶油风推荐商品” | `match_products` |
-| “把任务书和户型整合成方案” | `compose_design_scheme` |
-| “给我客厅效果图提示词” | `generate_render_prompt` |
-| “直接生成效果图” | `generate_design_render` |
-| “把效果图上传云端” | `upload_render_to_tos` |
-| “给我草案报价” | `generate_quote` |
-| “一键跑完整流程” | `generate_full_design_package` |
-| “把结果回写项目系统” | `save_scheme_to_project`（需确认） |
+2. 户型解析
+- 工具顺序：`upload_floorplan_to_tos` -> `parse_floorplan`
+- 输入支持：`image_url` 或 `image_base64`
+- 规则：解析必须真实调用，不得伪造。
 
-### MCP 调用方式（兼容说明）
-不同平台对 MCP/Tool 调用协议实现不同，请优先遵循平台规范。
+3. 方案草案
+- 工具顺序：`match_products` -> `compose_design_scheme`
+- 规则：商品必须来自工具返回，不可杜撰 SKU/价格。
 
-- **HTTP Tool 风格**（本项目服务默认支持）
-  - `GET {mcp_server.url}/tools`
-  - `POST {mcp_server.url}/tools/{tool_name}`
+4. 效果图
+- 工具顺序：`generate_render_prompt` -> `generate_design_render` -> `upload_render_to_tos`
+- 规则：效果图必须真实生成并上传TOS，返回 `object_key` 和访问URL。
 
-- **JSON-RPC MCP 风格**（某些平台会使用）
-  - 端点使用 `skill.json` 里的 `mcp_server.url`
-  - 方法通常为 `tools/list`、`tools/call`（以平台适配器为准）
+5. 报价
+- 工具：`generate_quote`
+- 规则：必须标记“草案/预估/待复核”。
 
-### 绝对规则
-1. 禁止臆造面积、户型结构、商品、价格、施工量。
-2. `parse_floorplan` 必须真实解析，不允许 mock 结果。
-3. `generate_design_render` 必须真实生成，不允许 mock 图片。
-4. `upload_floorplan_to_tos` / `upload_render_to_tos` 必须真实上传，不允许 mock 返回。
-5. 报价必须标注“草案/预估/待复核”。
+6. 全流程
+- 工具：`generate_full_design_package`
+- 场景：用户希望快速得到完整结果包。
 
-### 失败与降级策略
-1. 缺少 Gemini 配置：返回明确配置错误，并提示补充后重试。
-2. 缺少 TOS 配置：返回明确配置错误，并提示补充后重试。
-3. 户型图质量不足：返回“信息不足+需人工复核”，不得编造。
-4. 外部接口超时：明确告知并提供“稍后重试/只输出已确认信息”。
+## 参数提取规则
+Agent需优先从对话抽取这些字段：
+- `user_requirements`: 用户原始目标与偏好
+- `budget_range`: 预算区间
+- `family_profile`: 家庭结构
+- `preferred_style`: 风格偏好
+- `forbidden_items`: 禁忌项
+- `room_name`: 重点空间（默认客厅）
+- `camera_view`: 镜头视角（可选）
+- `project_id`: 项目标识（若无可由Agent生成）
 
-### 盲区应对
-超出本 Skill 工具能力范围（如施工许可、结构安全鉴定、合同法律意见）时：
-1. 诚实说明超出能力边界。
-2. 提供可执行下一步（如请设计师复尺、请项目经理复核、请法务确认条款）。
-3. 不做无依据承诺。
+若缺关键参数：
+- 户型图缺失：提示用户上传图片
+- 预算缺失：提示给区间
+- 风格缺失：提供选项（现代/奶油/原木/轻奢/新中式）
 
-### 品牌语气
-- 专业、克制、可信、偏企业级。
-- 明确风险边界，不夸大 AI 精度。
-- 结论先行，证据与限制同步说明。
+## 绝对约束
+1. 不得臆造面积、空间结构、商品价格、施工量。
+2. `parse_floorplan` / `generate_design_render` / `upload_render_to_tos` / `upload_floorplan_to_tos` 禁止 mock。
+3. 用户未确认前，不调用 `save_scheme_to_project`。
+
+## 输出规范
+每次结果应包含：
+1. 已完成步骤
+2. 关键结构化结果摘要
+3. 风险/待复核项
+4. 资产链接（户型图/效果图上传链接）
+5. 下一步建议
+
+## 降级策略
+1. MCP不可达：明确提示服务不可用并建议稍后重试。
+2. Gemini调用失败：返回失败原因并建议重试或降级到任务书/方案层。
+3. TOS上传失败：保留本地生成结果摘要并提示上传重试。
+
+## 推荐首轮对话模板
+当用户首次使用时，Agent可说：
+“我可以帮你做晶鲤家装设计AI全流程。请告诉我：户型图（上传）、预算范围、家庭结构、偏好风格、禁忌项。若你愿意，我也可以先从需求梳理开始。”
