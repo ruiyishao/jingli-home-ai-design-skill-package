@@ -1,0 +1,97 @@
+{
+  "name": "jingli-home-ai-design-skill",
+  "display_name": "晶鲤焕新家AI设计",
+  "version": "0.1.0",
+  "description": "家装设计 Skill / 远程 MCP Connector，提供真实户型图解析、真实效果图生成、TOS上传、方案与报价草案工具集。",
+  "mcp_server": {
+    "transport": "http",
+    "base_url_env": "MCP_BASE_URL",
+    "default_base_url": "http://misc.wjkj.com:8010",
+    "tools_endpoint": "/tools"
+  },
+  "tools": [
+    {
+      "name": "parse_floorplan",
+      "description": "真实调用 Gemini 视觉能力解析户型图并输出结构化结果（非mock）",
+      "read_only": true,
+      "input_schema": {
+        "type": "object",
+        "properties": {
+          "project_id": {"type": "string"},
+          "image_url": {"type": "string"},
+          "image_base64": {"type": "string"},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    {
+      "name": "build_design_brief",
+      "description": "将自然语言需求转换为结构化设计任务书",
+      "read_only": true,
+      "input_schema": {"$ref": "app/schemas/design_brief.schema.json"}
+    },
+    {
+      "name": "match_products",
+      "description": "基于空间/风格/预算从商品库匹配候选商品",
+      "read_only": true,
+      "input_schema": {
+        "type": "object",
+        "required": ["space_type", "style"],
+        "properties": {
+          "space_type": {"type": "string"},
+          "style": {"type": "string"},
+          "budget_level": {"type": "string"},
+          "constraints": {"type": "array", "items": {"type": "string"}}
+        }
+      }
+    },
+    {
+      "name": "compose_design_scheme",
+      "description": "组合任务书、户型结果、商品候选生成方案草案",
+      "read_only": true,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "generate_render_prompt",
+      "description": "将设计方案转成家装效果图可用提示词",
+      "read_only": true,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "generate_design_render",
+      "description": "真实调用 Gemini 图像模型生成家装效果图（非mock）",
+      "read_only": false,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "upload_floorplan_to_tos",
+      "description": "由Agent将用户户型图上传到TOS并返回可访问对象地址",
+      "read_only": false,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "upload_render_to_tos",
+      "description": "真实调用火山引擎TOS SDK上传效果图并返回对象地址（非mock）",
+      "read_only": false,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "generate_quote",
+      "description": "按方案与定额规则输出草案报价",
+      "read_only": true,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "save_scheme_to_project",
+      "description": "回写项目结果（v0.1写本地mock，预留真实接口替换点）",
+      "read_only": false,
+      "input_schema": {"type": "object"}
+    },
+    {
+      "name": "generate_full_design_package",
+      "description": "专用Agent一键串联全链路（保留所有原子工具）",
+      "read_only": false,
+      "input_schema": {"type": "object"}
+    }
+  ]
+}
