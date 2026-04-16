@@ -1,13 +1,28 @@
 {
   "name": "jingli-home-ai-design-skill",
   "display_name": "晶鲤焕新家AI设计",
-  "version": "0.1.0",
-  "description": "家装设计 Skill / 远程 MCP Connector，提供真实户型图解析、真实效果图生成、TOS上传、方案与报价草案工具集。",
+  "version": "0.2.0",
+  "description": "家装设计 Skill / 远程 MCP Connector，提供真实户型图解析、Gemini nano banana 效果图生成、TOS上传、方案与报价草案工具集。",
+  "keywords": [
+    "家装",
+    "装修设计",
+    "户型图",
+    "效果图",
+    "报价",
+    "Gemini",
+    "nano banana",
+    "TOS",
+    "火山云",
+    "晶鲤"
+  ],
   "mcp_server": {
     "transport": "http",
+    "url": "http://misc.wjkj.com:8010",
+    "url_env": "MCP_BASE_URL",
     "base_url_env": "MCP_BASE_URL",
     "default_base_url": "http://misc.wjkj.com:8010",
-    "tools_endpoint": "/tools"
+    "tools_endpoint": "/tools",
+    "notes": "Compatibility fields included for different agent platforms: prefer `url`, fallback to `default_base_url + tools_endpoint`."
   },
   "tools": [
     {
@@ -59,7 +74,7 @@
     },
     {
       "name": "generate_design_render",
-      "description": "真实调用 Gemini 图像模型生成家装效果图（非mock）",
+      "description": "真实调用 Gemini nano banana 图像模型生成家装效果图（非mock）",
       "read_only": false,
       "input_schema": {"type": "object"}
     },
