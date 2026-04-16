@@ -13,10 +13,9 @@
 
 ## 当前远程服务
 `skill.json` 默认 `mcp_server.default_base_url`：
-`http://misc.wjkj.com:8010`
+`http://misc.wjkj.com/mcp`
 
 ## 安装示例
 对通用 Agent 说：
 
 > 帮我安装 skill：晶鲤焕新家AI设计，仓库地址：<这个skill仓库地址>
-
