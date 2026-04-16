@@ -17,10 +17,10 @@
   ],
   "mcp_server": {
     "transport": "http",
-    "url": "http://misc.wjkj.com/mcp",
+    "url": "https://misc.wjkj.com/mcp",
     "url_env": "MCP_BASE_URL",
     "base_url_env": "MCP_BASE_URL",
-    "default_base_url": "http://misc.wjkj.com/mcp",
+    "default_base_url": "https://misc.wjkj.com/mcp",
     "tools_endpoint": "/tools",
     "notes": "Compatibility fields included for different agent platforms: prefer `url`, fallback to `default_base_url + tools_endpoint`."
   },

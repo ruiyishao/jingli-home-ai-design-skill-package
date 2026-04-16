@@ -13,7 +13,7 @@
 
 ## 当前远程服务
 `skill.json` 默认 `mcp_server.default_base_url`：
-`http://misc.wjkj.com/mcp`
+`https://misc.wjkj.com/mcp`
 
 ## 安装示例
 对通用 Agent 说：
